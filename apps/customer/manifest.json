@@ -1,0 +1,9 @@
+{
+  "name": "QR Customer",
+  "short_name": "Customer",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "QR ordering app",
+  "icons": []
+}

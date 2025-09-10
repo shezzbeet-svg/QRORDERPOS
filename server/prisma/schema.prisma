@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = env("DATABASE_PROVIDER", "sqlite")
+  url      = env("DATABASE_URL", "file:./dev.db")
+}
+
+model Restaurant {
+  id         String   @id @default(uuid())
+  name       String
+  currency   String   @default("PKR")
+  timezone   String
+  locale     String
+  serviceFee Float    @default(0)
+  tipOptions Float[]  @default([])
+  tables     Table[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Table {
+  id              String   @id @default(uuid())
+  number          String
+  capacity        Int
+  status          String
+  currentSessionId String? @unique
+  restaurantId    String
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id])
+  sessions        Session[]
+  qrs             QRCode[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Session {
+  id             String   @id @default(uuid())
+  tableId        String
+  table          Table    @relation(fields: [tableId], references: [id])
+  openedByUserId String
+  openedAt       DateTime @default(now())
+  closedAt       DateTime?
+  pax            Int
+  notes          String?
+  orders         Order[]
+  bills          Bill[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model User {
+  id      String @id @default(uuid())
+  name    String
+  email   String?
+  phone   String?
+  role    String
+  pinHash String
+  status  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MenuCategory {
+  id        String   @id @default(uuid())
+  name      String
+  sortOrder Int
+  visible   Boolean @default(true)
+  items     MenuItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  categoryId  String
+  category    MenuCategory @relation(fields: [categoryId], references: [id])
+  name        String
+  description String?
+  price       Float
+  photoUrl    String?
+  tags        String[]
+  allergens   String[]
+  active      Boolean @default(true)
+  orderItems  OrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ModifierGroup {
+  id        String   @id @default(uuid())
+  name      String
+  required  Boolean @default(false)
+  min       Int?
+  max       Int?
+  sortOrder Int      @default(0)
+  modifiers Modifier[]
+}
+
+model Modifier {
+  id        String   @id @default(uuid())
+  groupId   String
+  group     ModifierGroup @relation(fields: [groupId], references: [id])
+  name      String
+  priceDelta Float @default(0)
+  sortOrder Int    @default(0)
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  source    String
+  status    String
+  sentAt    DateTime?
+  items     OrderItem[]
+  tickets   Ticket[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  menuItemId  String
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
+  qty         Int
+  notes       String?
+  seatNo      Int?
+  priceEach   Float
+  modifiersJson String?
+}
+
+model Ticket {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  station   String
+  status    String
+  printedAt DateTime?
+}
+
+model Bill {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id])
+  status    String
+  subtotal  Float
+  tax       Float
+  serviceFee Float
+  tip       Float
+  discounts Float
+  total     Float
+  splits    BillSplit[]
+  payments  Payment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BillSplit {
+  id       String  @id @default(uuid())
+  billId   String
+  bill     Bill    @relation(fields: [billId], references: [id])
+  label    String
+  seatNos  Int[]
+  amount   Float
+  status   String
+}
+
+model Payment {
+  id          String @id @default(uuid())
+  billId      String
+  bill        Bill   @relation(fields: [billId], references: [id])
+  method      String
+  providerRef String?
+  amount      Float
+  tipAmount   Float @default(0)
+  status      String
+  createdByUserId String?
+  paidAt      DateTime?
+}
+
+model Notification {
+  id          String @id @default(uuid())
+  type        String
+  tableId     String?
+  sessionId   String?
+  payloadJson String?
+  ackByUserId String?
+  ackAt       DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model Device {
+  id          String @id @default(uuid())
+  type        String
+  name        String
+  location    String?
+  pairingCode String
+  lastSeenAt  DateTime?
+}
+
+model QRCode {
+  id           String @id @default(uuid())
+  tableId      String
+  table        Table   @relation(fields: [tableId], references: [id])
+  slug         String  @unique
+  secret       String
+  active       Boolean @default(true)
+  lastRotatedAt DateTime?
+}
