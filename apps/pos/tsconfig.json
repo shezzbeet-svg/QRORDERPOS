@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "target": "esnext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["next", "next/types/global", "vitest/globals"]
+  },
+  "include": ["next-env.d.ts", "src/**/*", "app/**/*", "test/**/*"],
+  "exclude": ["node_modules"]
+}

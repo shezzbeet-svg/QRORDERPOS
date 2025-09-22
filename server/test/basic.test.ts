@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+// @ts-nocheck
+import test from 'node:test';
+import assert from 'node:assert/strict';
 
-describe('server', () => {
-  it('works', () => {
-    expect(true).toBe(true);
-  });
+test('server works sanity check', () => {
+  assert.equal(true, true);
 });

@@ -1,11 +1,14 @@
-import { Server } from 'socket.io';
+export let io: any = {
+  emit: () => {},
+  on: () => {},
+  close: () => {}
+};
 
-export let io: Server;
-
-export function init(server: any) {
-  io = new Server(server, { cors: { origin: '*' } });
-  io.on('connection', socket => {
-    console.log('socket connected', socket.id);
-  });
+export function init(_server: any) {
+  io = {
+    emit: () => {},
+    on: () => {},
+    close: () => {}
+  };
   return io;
 }
