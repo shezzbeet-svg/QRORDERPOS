@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+ codex/build-modular-frontend-for-restaurant-pos-yluvnu
 import { API_ROOT, refreshSession } from './authClient';
 import { useAuth } from '../hooks/useAuth';
 
@@ -20,11 +21,21 @@ export const clientUuid = (() => {
   if (!id) {
     id = uuidv4();
     window.localStorage.setItem('client_uuid', id);
+
+
+const clientUuid = (() => {
+  if (typeof localStorage === 'undefined') return 'server';
+  let id = localStorage.getItem('client_uuid');
+  if (!id) {
+    id = uuidv4();
+    localStorage.setItem('client_uuid', id);
+ main
   }
   return id;
 })();
 
 export async function apiFetch<T>(merchant: string, path: string, options: RequestInit = {}): Promise<T> {
+ codex/build-modular-frontend-for-restaurant-pos-yluvnu
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${API_ROOT}/api/merchants/${merchant}${normalizedPath}`;
   const state = useAuth.getState();
@@ -94,4 +105,21 @@ export async function apiFetch<T>(merchant: string, path: string, options: Reque
   } catch (error) {
     throw new ApiError('Failed to parse response', res.status, text);
   }
+
+  const idempotencyKey = uuidv4();
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Client-UUID': clientUuid,
+    'Idempotency-Key': idempotencyKey,
+    ...(options.headers || {})
+  } as Record<string, string>;
+  const res = await fetch(`/merchants/${merchant}${path}`, {
+    ...options,
+    headers
+  });
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+  return res.json() as Promise<T>;
+ main
 }

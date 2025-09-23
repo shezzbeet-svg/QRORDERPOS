@@ -4,6 +4,7 @@ import { useLocale } from '../hooks/useLocale';
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const { locale } = useLocale();
+ codex/build-modular-frontend-for-restaurant-pos-yluvnu
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -20,5 +21,13 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
     root.lang = locale;
   }, [locale]);
 
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+    document.documentElement.dir = locale === 'ur' ? 'rtl' : 'ltr';
+  }, [locale]);
+ main
   return children as any;
 }

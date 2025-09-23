@@ -4,6 +4,7 @@ const translations: Record<Locale, Record<string, string>> = {
   en: {
     menu: 'Menu',
     order: 'Order',
+ codex/build-modular-frontend-for-restaurant-pos-yluvnu
     waiterConsole: 'Waiter Console',
     dashboard: 'Dashboard',
     inventory: 'Inventory',
@@ -28,10 +29,14 @@ const translations: Record<Locale, Record<string, string>> = {
     tip: 'Tip',
     totalsToday: 'Totals today',
     openOrders: 'Open tickets'
+
+    logout: 'Logout'
+ main
   },
   ur: {
     menu: '\u0645\u06cc\u0646\u0648',
     order: '\u0622\u0631\u0688\u0631',
+ codex/build-modular-frontend-for-restaurant-pos-yluvnu
     waiterConsole: '\u0648\u06cc\u0679\u0631 \u06a9\u0648\u0646\u0633\u0648\u0644',
     dashboard: '\u0688\u06cc\u0634 \u0628\u0648\u0631\u0688',
     inventory: '\u0627\u0646\u0648\u06cc\u0646\u0679\u0631\u06cc',
@@ -56,6 +61,9 @@ const translations: Record<Locale, Record<string, string>> = {
     tip: '\u0679\u067e',
     totalsToday: '\u0627\u062c \u06a9\u06d2 \u0627\u0639\u062f\u0627\u062f',
     openOrders: '\u0627\u0633\u0679\u06d2 \u0622\u0631\u0688\u0631\u0632'
+
+    logout: '\u0644\u0627\u06af \u0622\u0648\u0679'
+ main
   }
 };
 

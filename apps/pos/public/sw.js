@@ -1,14 +1,20 @@
 self.addEventListener('install', event => {
+ codex/build-modular-frontend-for-restaurant-pos-yluvnu
   self.skipWaiting();
+
+ main
   event.waitUntil(
     caches.open('qrpos-static').then(cache => cache.addAll(['/manifest.json']))
   );
 });
 
+ codex/build-modular-frontend-for-restaurant-pos-yluvnu
 self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
 });
 
+
+ main
 self.addEventListener('fetch', event => {
   const { request } = event;
   if (request.method !== 'GET') return;
@@ -25,6 +31,7 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-outbox') {
+ codex/build-modular-frontend-for-restaurant-pos-yluvnu
     event.waitUntil(
       self.clients
         .matchAll({ type: 'window', includeUncontrolled: true })
@@ -32,5 +39,8 @@ self.addEventListener('sync', event => {
           clients.forEach(client => client.postMessage({ type: 'SYNC_OUTBOX' }));
         })
     );
+
+    event.waitUntil(self.syncOutbox && self.syncOutbox());
+ main
   }
 });
