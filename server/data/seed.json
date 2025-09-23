@@ -1,0 +1,227 @@
+{
+  "restaurants": [
+    {
+      "id": "demo-rest",
+      "slug": "demo-bistro",
+      "name": "Demo Bistro",
+      "currency": "PKR",
+      "timezone": "Asia/Karachi",
+      "locale": "en-PK",
+      "serviceFee": 0.1,
+      "tipOptions": [0, 5, 10]
+    }
+  ],
+  "users": [
+    {
+      "id": "admin-demo",
+      "restaurantId": "demo-rest",
+      "code": "ADM001",
+      "name": "Demo Admin",
+      "email": "admin@demo.local",
+      "role": "admin",
+      "status": "active",
+      "pinHash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+    },
+    {
+      "id": "cashier-demo",
+      "restaurantId": "demo-rest",
+      "code": "CASH001",
+      "name": "Demo Cashier",
+      "email": "cashier@demo.local",
+      "role": "cashier",
+      "status": "active",
+      "pinHash": "fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3"
+    },
+    {
+      "id": "waiter-demo",
+      "restaurantId": "demo-rest",
+      "code": "WAIT001",
+      "name": "Demo Waiter",
+      "email": "waiter@demo.local",
+      "role": "waiter",
+      "status": "active",
+      "pinHash": "9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0"
+    }
+  ],
+  "tables": [
+    { "id": "demo-table-1", "restaurantId": "demo-rest", "number": "1", "capacity": 4, "status": "vacant" },
+    { "id": "demo-table-2", "restaurantId": "demo-rest", "number": "2", "capacity": 4, "status": "vacant" },
+    { "id": "demo-table-3", "restaurantId": "demo-rest", "number": "3", "capacity": 4, "status": "vacant" },
+    { "id": "demo-table-4", "restaurantId": "demo-rest", "number": "4", "capacity": 4, "status": "vacant" },
+    { "id": "demo-table-5", "restaurantId": "demo-rest", "number": "5", "capacity": 4, "status": "vacant" },
+    { "id": "demo-table-6", "restaurantId": "demo-rest", "number": "6", "capacity": 4, "status": "vacant" },
+    { "id": "demo-table-7", "restaurantId": "demo-rest", "number": "7", "capacity": 4, "status": "vacant" },
+    { "id": "demo-table-8", "restaurantId": "demo-rest", "number": "8", "capacity": 4, "status": "vacant" }
+  ],
+  "qrCodes": [
+    { "id": "qr-1", "restaurantId": "demo-rest", "tableId": "demo-table-1", "slug": "demo-1", "secret": "secret-1", "active": true },
+    { "id": "qr-2", "restaurantId": "demo-rest", "tableId": "demo-table-2", "slug": "demo-2", "secret": "secret-2", "active": true },
+    { "id": "qr-3", "restaurantId": "demo-rest", "tableId": "demo-table-3", "slug": "demo-3", "secret": "secret-3", "active": true },
+    { "id": "qr-4", "restaurantId": "demo-rest", "tableId": "demo-table-4", "slug": "demo-4", "secret": "secret-4", "active": true },
+    { "id": "qr-5", "restaurantId": "demo-rest", "tableId": "demo-table-5", "slug": "demo-5", "secret": "secret-5", "active": true },
+    { "id": "qr-6", "restaurantId": "demo-rest", "tableId": "demo-table-6", "slug": "demo-6", "secret": "secret-6", "active": true },
+    { "id": "qr-7", "restaurantId": "demo-rest", "tableId": "demo-table-7", "slug": "demo-7", "secret": "secret-7", "active": true },
+    { "id": "qr-8", "restaurantId": "demo-rest", "tableId": "demo-table-8", "slug": "demo-8", "secret": "secret-8", "active": true }
+  ],
+  "menuCategories": [
+    { "id": "cat-mains", "restaurantId": "demo-rest", "name": "Mains", "sortOrder": 1, "visible": true },
+    { "id": "cat-drinks", "restaurantId": "demo-rest", "name": "Beverages", "sortOrder": 2, "visible": true }
+  ],
+  "menuItems": [
+    {
+      "id": "item-burger",
+      "restaurantId": "demo-rest",
+      "categoryId": "cat-mains",
+      "name": "Signature Burger",
+      "description": "Char-grilled beef burger with fries",
+      "price": 850,
+      "photoUrl": null,
+      "tags": ["best-seller"],
+      "allergens": ["gluten"],
+      "active": true
+    },
+    {
+      "id": "item-fries",
+      "restaurantId": "demo-rest",
+      "categoryId": "cat-mains",
+      "name": "Crispy Fries",
+      "description": "Twice fried potatoes with house seasoning",
+      "price": 350,
+      "photoUrl": null,
+      "tags": ["vegetarian"],
+      "allergens": [],
+      "active": true
+    },
+    {
+      "id": "item-cola",
+      "restaurantId": "demo-rest",
+      "categoryId": "cat-drinks",
+      "name": "House Cola",
+      "description": "Fountain drink with refill",
+      "price": 180,
+      "photoUrl": null,
+      "tags": ["drink"],
+      "allergens": [],
+      "active": true
+    }
+  ],
+  "inventoryItems": [
+    {
+      "id": "inv-bun",
+      "restaurantId": "demo-rest",
+      "name": "Burger Bun",
+      "sku": null,
+      "trackInventory": true,
+      "unit": "pcs",
+      "parLevel": 40,
+      "currentStock": 120,
+      "isActive": true
+    },
+    {
+      "id": "inv-patty",
+      "restaurantId": "demo-rest",
+      "name": "Beef Patty",
+      "sku": null,
+      "trackInventory": true,
+      "unit": "pcs",
+      "parLevel": 30,
+      "currentStock": 80,
+      "isActive": true
+    },
+    {
+      "id": "inv-fries",
+      "restaurantId": "demo-rest",
+      "name": "Potatoes (kg)",
+      "sku": null,
+      "trackInventory": true,
+      "unit": "kg",
+      "parLevel": 20,
+      "currentStock": 200,
+      "isActive": true
+    },
+    {
+      "id": "inv-cola",
+      "restaurantId": "demo-rest",
+      "name": "Cola Syrup (L)",
+      "sku": null,
+      "trackInventory": true,
+      "unit": "L",
+      "parLevel": 10,
+      "currentStock": 50,
+      "isActive": true
+    }
+  ],
+  "recipeComponents": [
+    { "id": "rc-1", "menuItemId": "item-burger", "inventoryItemId": "inv-bun", "quantity": 1, "unit": "pcs" },
+    { "id": "rc-2", "menuItemId": "item-burger", "inventoryItemId": "inv-patty", "quantity": 1, "unit": "pcs" },
+    { "id": "rc-3", "menuItemId": "item-burger", "inventoryItemId": "inv-fries", "quantity": 0.2, "unit": "kg" },
+    { "id": "rc-4", "menuItemId": "item-fries", "inventoryItemId": "inv-fries", "quantity": 0.15, "unit": "kg" },
+    { "id": "rc-5", "menuItemId": "item-cola", "inventoryItemId": "inv-cola", "quantity": 0.03, "unit": "L" }
+  ],
+  "stockAdjustments": [
+    {
+      "id": "adj-bun-opening",
+      "restaurantId": "demo-rest",
+      "inventoryItemId": "inv-bun",
+      "userId": null,
+      "delta": 120,
+      "reason": "Opening balance",
+      "source": "manual",
+      "metadata": null,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "adj-patty-opening",
+      "restaurantId": "demo-rest",
+      "inventoryItemId": "inv-patty",
+      "userId": null,
+      "delta": 80,
+      "reason": "Opening balance",
+      "source": "manual",
+      "metadata": null,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "adj-fries-opening",
+      "restaurantId": "demo-rest",
+      "inventoryItemId": "inv-fries",
+      "userId": null,
+      "delta": 200,
+      "reason": "Opening balance",
+      "source": "manual",
+      "metadata": null,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "adj-cola-opening",
+      "restaurantId": "demo-rest",
+      "inventoryItemId": "inv-cola",
+      "userId": null,
+      "delta": 50,
+      "reason": "Opening balance",
+      "source": "manual",
+      "metadata": null,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "devices": [
+    {
+      "id": "device-printer-1",
+      "restaurantId": "demo-rest",
+      "type": "printer",
+      "name": "Kitchen Printer",
+      "location": "Kitchen pass",
+      "pairingCode": "PAIR-001",
+      "lastSeenAt": null
+    }
+  ],
+  "orders": [],
+  "orderItems": [],
+  "payments": [],
+  "tickets": [],
+  "stockCounts": [],
+  "stockCountEntries": [],
+  "notifications": [],
+  "refreshTokens": [],
+  "idempotencyRecords": []
+}

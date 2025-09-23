@@ -7,161 +7,358 @@ datasource db {
   url      = env("DATABASE_URL", "file:./dev.db")
 }
 
+enum UserRole {
+  ADMIN
+  CASHIER
+  WAITER
+  MANAGER
+  CHEF
+}
+
+enum TableStatus {
+  VACANT
+  SEATED
+  DIRTY
+  HELD
+}
+
+enum OrderSource {
+  CUSTOMER
+  WAITER
+  KIOSK
+}
+
+enum OrderStatus {
+  OPEN
+  SENT
+  IN_PROGRESS
+  READY
+  SERVED
+  VOID
+}
+
+enum TicketStation {
+  KITCHEN
+  BAR
+}
+
+enum TicketStatus {
+  NEW
+  IN_PROGRESS
+  READY
+  BUMPED
+}
+
+enum BillStatus {
+  OPEN
+  PARTIALLY_PAID
+  PAID
+  VOID
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  EASYPAYISA
+  JAZZCASH
+}
+
+enum PaymentStatus {
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  VOID
+}
+
+enum NotificationType {
+  CALL_WAITER
+  ORDER_STATUS
+  PAYMENT
+}
+
+enum DeviceType {
+  KDS
+  PRINTER
+  DISPLAY
+  TABLET
+}
+
+enum StockAdjustmentSource {
+  MANUAL
+  RECIPE
+  COUNT
+}
+
+enum StockCountStatus {
+  OPEN
+  COMPLETED
+}
+
 model Restaurant {
-  id         String   @id @default(uuid())
-  name       String
-  currency   String   @default("PKR")
-  timezone   String
-  locale     String
-  serviceFee Float    @default(0)
-  tipOptions Float[]  @default([])
-  tables     Table[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                 String               @id @default(uuid())
+  slug               String               @unique
+  name               String
+  currency           String               @default("PKR")
+  timezone           String
+  locale             String
+  serviceFee         Float                @default(0)
+  tipOptions         Float[]              @default([])
+  tables             Table[]
+  users              User[]
+  menuCategories     MenuCategory[]
+  menuItems          MenuItem[]
+  inventoryItems     InventoryItem[]
+  devices            Device[]
+  sessions           Session[]
+  orders             Order[]
+  tickets            Ticket[]
+  bills              Bill[]
+  payments           Payment[]
+  notifications      Notification[]
+  qrCodes            QRCode[]
+  stockAdjustments   StockAdjustment[]
+  stockCounts        StockCount[]
+  idempotencyRecords IdempotencyRecord[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}
+
+model User {
+  id               String             @id @default(uuid())
+  restaurantId     String
+  restaurant       Restaurant         @relation(fields: [restaurantId], references: [id])
+  code             String             @unique
+  name             String
+  email            String?
+  phone            String?
+  role             UserRole
+  pinHash          String
+  status           String
+  refreshTokens    RefreshToken[]
+  takenOrders      Order[]            @relation("OrderTakenBy")
+  stockAdjustments StockAdjustment[]
+  stockCounts      StockCount[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+  deviceId  String?
 }
 
 model Table {
-  id              String   @id @default(uuid())
-  number          String
-  capacity        Int
-  status          String
-  currentSessionId String? @unique
-  restaurantId    String
-  restaurant      Restaurant @relation(fields: [restaurantId], references: [id])
-  sessions        Session[]
-  qrs             QRCode[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String      @id @default(uuid())
+  restaurantId     String
+  restaurant       Restaurant  @relation(fields: [restaurantId], references: [id])
+  number           String
+  capacity         Int
+  status           TableStatus
+  currentSessionId String?     @unique
+  sessions         Session[]
+  qrs              QRCode[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }
 
 model Session {
-  id             String   @id @default(uuid())
-  tableId        String
-  table          Table    @relation(fields: [tableId], references: [id])
+  id             String      @id @default(uuid())
+  restaurantId   String
+  restaurant     Restaurant  @relation(fields: [restaurantId], references: [id])
+  tableId        String?
+  table          Table?      @relation(fields: [tableId], references: [id])
   openedByUserId String
-  openedAt       DateTime @default(now())
+  openedBy       User        @relation(fields: [openedByUserId], references: [id])
+  openedAt       DateTime    @default(now())
   closedAt       DateTime?
   pax            Int
   notes          String?
   orders         Order[]
   bills          Bill[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-model User {
-  id      String @id @default(uuid())
-  name    String
-  email   String?
-  phone   String?
-  role    String
-  pinHash String
-  status  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 model MenuCategory {
-  id        String   @id @default(uuid())
-  name      String
-  sortOrder Int
-  visible   Boolean @default(true)
-  items     MenuItem[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String      @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  name         String
+  sortOrder    Int
+  visible      Boolean     @default(true)
+  items        MenuItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model MenuItem {
-  id          String   @id @default(uuid())
-  categoryId  String
-  category    MenuCategory @relation(fields: [categoryId], references: [id])
-  name        String
-  description String?
-  price       Float
-  photoUrl    String?
-  tags        String[]
-  allergens   String[]
-  active      Boolean @default(true)
-  orderItems  OrderItem[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String            @id @default(uuid())
+  restaurantId     String
+  restaurant       Restaurant        @relation(fields: [restaurantId], references: [id])
+  categoryId       String
+  category         MenuCategory      @relation(fields: [categoryId], references: [id])
+  name             String
+  description      String?
+  price            Float
+  photoUrl         String?
+  tags             String[]
+  allergens        String[]
+  active           Boolean           @default(true)
+  recipeComponents RecipeComponent[]
+  orderItems       OrderItem[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
-model ModifierGroup {
-  id        String   @id @default(uuid())
-  name      String
-  required  Boolean @default(false)
-  min       Int?
-  max       Int?
-  sortOrder Int      @default(0)
-  modifiers Modifier[]
+model RecipeComponent {
+  id              String         @id @default(uuid())
+  menuItemId      String
+  menuItem        MenuItem       @relation(fields: [menuItemId], references: [id])
+  inventoryItemId String
+  inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+  quantity        Float
+  unit            String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([menuItemId, inventoryItemId])
 }
 
-model Modifier {
-  id        String   @id @default(uuid())
-  groupId   String
-  group     ModifierGroup @relation(fields: [groupId], references: [id])
-  name      String
-  priceDelta Float @default(0)
-  sortOrder Int    @default(0)
+model InventoryItem {
+  id                String             @id @default(uuid())
+  restaurantId      String
+  restaurant        Restaurant         @relation(fields: [restaurantId], references: [id])
+  name              String
+  sku               String?
+  trackInventory    Boolean            @default(true)
+  unit              String             @default("unit")
+  parLevel          Float?
+  currentStock      Float              @default(0)
+  isActive          Boolean            @default(true)
+  recipeComponents  RecipeComponent[]
+  stockAdjustments  StockAdjustment[]
+  stockCountEntries StockCountEntry[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model StockAdjustment {
+  id              String                @id @default(uuid())
+  restaurantId    String
+  restaurant      Restaurant            @relation(fields: [restaurantId], references: [id])
+  inventoryItemId String
+  inventoryItem   InventoryItem         @relation(fields: [inventoryItemId], references: [id])
+  userId          String?
+  user            User?                 @relation(fields: [userId], references: [id])
+  delta           Float
+  reason          String
+  source          StockAdjustmentSource
+  metadata        Json?
+  createdAt       DateTime              @default(now())
+}
+
+model StockCount {
+  id           String           @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant       @relation(fields: [restaurantId], references: [id])
+  userId       String?
+  user         User?            @relation(fields: [userId], references: [id])
+  status       StockCountStatus
+  startedAt    DateTime         @default(now())
+  completedAt  DateTime?
+  entries      StockCountEntry[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model StockCountEntry {
+  id              String        @id @default(uuid())
+  stockCountId    String
+  stockCount      StockCount    @relation(fields: [stockCountId], references: [id])
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  expected        Float
+  counted         Float
+  variance        Float
+  createdAt       DateTime      @default(now())
 }
 
 model Order {
-  id        String   @id @default(uuid())
-  sessionId String
-  session   Session  @relation(fields: [sessionId], references: [id])
-  source    String
-  status    String
-  sentAt    DateTime?
-  items     OrderItem[]
-  tickets   Ticket[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String      @id @default(uuid())
+  restaurantId   String
+  restaurant     Restaurant  @relation(fields: [restaurantId], references: [id])
+  sessionId      String?
+  session        Session?    @relation(fields: [sessionId], references: [id])
+  takenByUserId  String?
+  takenBy        User?       @relation("OrderTakenBy", fields: [takenByUserId], references: [id])
+  source         OrderSource
+  status         OrderStatus
+  sentAt         DateTime?
+  clientUuid     String
+  idempotencyKey String
+  items          OrderItem[]
+  tickets        Ticket[]
+  payments       Payment[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([restaurantId, clientUuid, idempotencyKey])
 }
 
 model OrderItem {
-  id          String   @id @default(uuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id])
-  menuItemId  String
-  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
-  qty         Int
-  notes       String?
-  seatNo      Int?
-  priceEach   Float
+  id           String    @id @default(uuid())
+  orderId      String
+  order        Order     @relation(fields: [orderId], references: [id])
+  menuItemId   String
+  menuItem     MenuItem  @relation(fields: [menuItemId], references: [id])
+  qty          Int
+  notes        String?
+  seatNo       Int?
+  priceEach    Float
   modifiersJson String?
+  createdAt    DateTime  @default(now())
 }
 
 model Ticket {
-  id        String   @id @default(uuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
-  station   String
-  status    String
-  printedAt DateTime?
+  id            String        @id @default(uuid())
+  restaurantId  String
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
+  orderId       String
+  order         Order         @relation(fields: [orderId], references: [id])
+  station       TicketStation
+  status        TicketStatus
+  printedAt     DateTime?
 }
 
 model Bill {
-  id        String   @id @default(uuid())
-  sessionId String
-  session   Session @relation(fields: [sessionId], references: [id])
-  status    String
-  subtotal  Float
-  tax       Float
-  serviceFee Float
-  tip       Float
-  discounts Float
-  total     Float
-  splits    BillSplit[]
-  payments  Payment[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String      @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  sessionId    String?
+  session      Session?    @relation(fields: [sessionId], references: [id])
+  status       BillStatus
+  subtotal     Float
+  tax          Float
+  serviceFee   Float
+  tip          Float
+  discounts    Float
+  total        Float
+  splits       BillSplit[]
+  payments     Payment[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model BillSplit {
-  id       String  @id @default(uuid())
+  id       String   @id @default(uuid())
   billId   String
-  bill     Bill    @relation(fields: [billId], references: [id])
+  bill     Bill     @relation(fields: [billId], references: [id])
   label    String
   seatNos  Int[]
   amount   Float
@@ -169,44 +366,77 @@ model BillSplit {
 }
 
 model Payment {
-  id          String @id @default(uuid())
-  billId      String
-  bill        Bill   @relation(fields: [billId], references: [id])
-  method      String
-  providerRef String?
-  amount      Float
-  tipAmount   Float @default(0)
-  status      String
+  id              String         @id @default(uuid())
+  restaurantId    String
+  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
+  billId          String?
+  bill            Bill?          @relation(fields: [billId], references: [id])
+  orderId         String?
+  order           Order?         @relation(fields: [orderId], references: [id])
+  method          PaymentMethod
+  providerRef     String?
+  amount          Float
+  tipAmount       Float          @default(0)
+  status          PaymentStatus
   createdByUserId String?
-  paidAt      DateTime?
+  createdBy       User?          @relation(fields: [createdByUserId], references: [id])
+  paidAt          DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
 
 model Notification {
-  id          String @id @default(uuid())
-  type        String
-  tableId     String?
-  sessionId   String?
-  payloadJson String?
-  ackByUserId String?
-  ackAt       DateTime?
-  createdAt   DateTime @default(now())
+  id           String           @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant       @relation(fields: [restaurantId], references: [id])
+  type         NotificationType
+  tableId      String?
+  table        Table?           @relation(fields: [tableId], references: [id])
+  sessionId    String?
+  session      Session?         @relation(fields: [sessionId], references: [id])
+  payloadJson  String?
+  ackByUserId  String?
+  ackBy        User?            @relation(fields: [ackByUserId], references: [id])
+  ackAt        DateTime?
+  createdAt    DateTime         @default(now())
 }
 
 model Device {
-  id          String @id @default(uuid())
-  type        String
-  name        String
-  location    String?
-  pairingCode String
-  lastSeenAt  DateTime?
+  id           String      @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  type         DeviceType
+  name         String
+  location     String?
+  pairingCode  String
+  lastSeenAt   DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model QRCode {
-  id           String @id @default(uuid())
-  tableId      String
-  table        Table   @relation(fields: [tableId], references: [id])
-  slug         String  @unique
-  secret       String
-  active       Boolean @default(true)
+  id            String     @id @default(uuid())
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  tableId       String
+  table         Table      @relation(fields: [tableId], references: [id])
+  slug          String     @unique
+  secret        String
+  active        Boolean    @default(true)
   lastRotatedAt DateTime?
+}
+
+model IdempotencyRecord {
+  id             String     @id @default(uuid())
+  restaurantId   String
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id])
+  clientUuid     String
+  idempotencyKey String
+  path           String
+  method         String
+  response       Json
+  statusCode     Int
+  createdAt      DateTime   @default(now())
+
+  @@unique([restaurantId, clientUuid, idempotencyKey, path, method])
 }
