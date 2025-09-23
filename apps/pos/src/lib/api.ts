@@ -2,6 +2,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { API_ROOT, refreshSession } from './authClient';
 import { useAuth } from '../hooks/useAuth';
 
+export class ApiError extends Error {
+  status: number;
+  details?: unknown;
+
+  constructor(message: string, status: number, details?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.details = details;
+  }
+}
+
 export const clientUuid = (() => {
   if (typeof window === 'undefined') return 'server-client';
   let id = window.localStorage.getItem('client_uuid');
@@ -32,7 +44,12 @@ export async function apiFetch<T>(merchant: string, path: string, options: Reque
   (options as any).headers = headers; // ensure offline queue preserves idempotency headers
 
   const execute = () => fetch(url, fetchOptions);
-  let res = await execute();
+  let res: Response;
+  try {
+    res = await execute();
+  } catch (error) {
+    throw error;
+  }
   if (res.status === 401 && state.refreshToken) {
     try {
       const refreshed = await refreshSession(state.refreshToken, clientUuid);
@@ -50,7 +67,31 @@ export async function apiFetch<T>(merchant: string, path: string, options: Reque
     }
   }
   if (!res.ok) {
-    throw new Error(await res.text());
+    let message = res.statusText;
+    let body: unknown;
+    try {
+      const text = await res.text();
+      message = text || message;
+      try {
+        body = text ? JSON.parse(text) : undefined;
+      } catch {
+        body = text;
+      }
+    } catch {
+      // ignore parsing error
+    }
+    throw new ApiError(message, res.status, body);
   }
-  return res.json() as Promise<T>;
+  if (res.status === 204) {
+    return undefined as T;
+  }
+  const text = await res.text();
+  if (!text.length) {
+    return undefined as T;
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch (error) {
+    throw new ApiError('Failed to parse response', res.status, text);
+  }
 }

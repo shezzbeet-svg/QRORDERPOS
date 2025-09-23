@@ -1,7 +1,12 @@
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open('qrpos-static').then(cache => cache.addAll(['/manifest.json']))
   );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', event => {
@@ -20,6 +25,12 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-outbox') {
-    event.waitUntil(self.syncOutbox && self.syncOutbox());
+    event.waitUntil(
+      self.clients
+        .matchAll({ type: 'window', includeUncontrolled: true })
+        .then(clients => {
+          clients.forEach(client => client.postMessage({ type: 'SYNC_OUTBOX' }));
+        })
+    );
   }
 });
